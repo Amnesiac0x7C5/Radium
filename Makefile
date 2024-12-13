@@ -3,8 +3,10 @@ RM= rm -rf
 
 SRC_DIR= src
 BUILD_DIR= build
+TEST_DIR= tests
 OBJ_DIR= $(BUILD_DIR)/obj
 BIN_DIR= $(BUILD_DIR)/bin
+TEST_BUILD_DIR = $(BUILD_DIR)/test
 
 CWARN = \
 	-Wfatal-errors \
@@ -52,6 +54,10 @@ run: $(TARGET)
 clean:
 	@$(RM) $(BUILD_DIR)
 
+test: $(SRC_DIR)
+	@mkdir -p $(TEST_BUILD_DIR)
+	$(CC) $(CFLAGS) $(wildcard $(TEST_DIR)/*.c) -o $(TEST_BUILD_DIR)/test_runner
+
 -include $(DEP)
 
-.PHONY: all clean run
+.PHONY: all clean run test
