@@ -1,5 +1,7 @@
 CC= clang
-RM= $(if $(filter Windows_NT,$(OS)),del /Q /S,rm -rf)
+FLEX= flex
+BISON= bison
+RM= rm -rf
 
 SRC_DIR= src
 BUILD_DIR= build
@@ -27,26 +29,35 @@ CWARN= \
     -Wstrict-prototypes \
     -Wc++-compat \
     -Wold-style-definition \
-    -Iinc
 
-CFLAGS= -Wall -O2 -std=c11 $(CWARN) -fno-stack-protector -fno-common -march=native -MMD -MP
+CFLAGS= -Wall -O2 -std=c17 $(CWARN) -fno-stack-protector -fno-common -march=native -MMD -MP
 LDFLAGS= -Wl,-E
 
 SRC= $(wildcard $(SRC_DIR)/*.c)
-OBJ= $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 DEP= $(OBJ:.o=.d)
 
-TARGET= $(BIN_DIR)/radium$(if $(filter Windows_NT,$(OS)),.exe,)
+LEX_SRC= $(SRC_DIR)/lexer.l
+YACC_SRC= $(SRC_DIR)/parser.y
+LEX_OBJ= $(BUILD_DIR)/lex.yy.c
+YACC_OBJ= $(BUILD_DIR)/parser.tab.c
+YACC_HEADER= $(BUILD_DIR)/parser.tab.h
+
+TARGET= $(BIN_DIR)/radium
+
 
 all: $(TARGET)
 
-$(TARGET): $(OBJ)
+$(TARGET): $(OBJ) $(LEX_OBJ) $(YACC_OBJ)
 	@mkdir -p $(BIN_DIR)
-	$(CC) $(OBJ) $(LDFLAGS) -o $@
+	$(CC) $(LEX_OBJ) $(YACC_OBJ) -o $@ $(LDFLAGS)
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+$(LEX_OBJ): $(LEX_SRC)
+	@mkdir -p $(BUILD_DIR)
+	$(FLEX) -o $(LEX_OBJ) $(LEX_SRC)
+
+$(YACC_OBJ) $(YACC_HEADER): $(YACC_SRC)
+	@mkdir -p $(BUILD_DIR)
+	$(BISON) -d -o $(YACC_OBJ) $(YACC_SRC)
 
 run: $(TARGET)
 	@$(TARGET)
@@ -54,10 +65,4 @@ run: $(TARGET)
 clean:
 	@$(RM) $(BUILD_DIR)
 
-test: $(SRC_DIR)
-	@mkdir -p $(TEST_BUILD_DIR)
-	$(CC) $(CFLAGS) $(wildcard $(TEST_DIR)/*.c) -o $(TEST_BUILD_DIR)/test_runner
-
--include $(DEP)
-
-.PHONY: all clean run test
+.PHONY: all clean run
