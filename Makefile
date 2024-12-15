@@ -1,68 +1,58 @@
-CC= clang
-FLEX= flex
-BISON= bison
-RM= rm -rf
+# Radium Makefile
 
-SRC_DIR= src
-BUILD_DIR= build
-TEST_DIR= tests
-OBJ_DIR= $(BUILD_DIR)/obj
-BIN_DIR= $(BUILD_DIR)/bin
-TEST_BUILD_DIR= $(BUILD_DIR)/test
+PROJ = radium
 
-CWARN= \
-    -Wfatal-errors \
-    -Wextra \
-    -Wshadow \
-    -Wundef \
-    -Wwrite-strings \
-    -Wredundant-decls \
-    -Wdisabled-optimization \
-    -Wdouble-promotion \
-    -Wmissing-declarations \
-    -Wconversion \
-    -Wuninitialized \
-    -Wstrict-overflow=2 \
-    -Wdeclaration-after-statement \
-    -Wmissing-prototypes \
-    -Wnested-externs \
-    -Wstrict-prototypes \
-    -Wc++-compat \
-    -Wold-style-definition \
+CC       = clang
+CC_FLAGS = --std=c17
+CC_REL   = -O2
+CC_DBG   = -O0 -Wall -g
 
-CFLAGS= -Wall -O2 -std=c17 $(CWARN) -fno-stack-protector -fno-common -march=native -MMD -MP
-LDFLAGS= -Wl,-E
+FLEX  = flex
+BISON = bison
+RM    = rm
 
-SRC= $(wildcard $(SRC_DIR)/*.c)
-DEP= $(OBJ:.o=.d)
+ifeq ($(OS), Windows_NT)
 
-LEX_SRC= $(SRC_DIR)/lexer.l
-YACC_SRC= $(SRC_DIR)/parser.y
-LEX_OBJ= $(BUILD_DIR)/lex.yy.c
-YACC_OBJ= $(BUILD_DIR)/parser.tab.c
-YACC_HEADER= $(BUILD_DIR)/parser.tab.h
+SHELL = pwsh.exe
+.SHELLFLAGS = -noprofile -command
 
-TARGET= $(BIN_DIR)/radium
+PROJ = radium.exe
+
+CC_FLAGS = --std=c17 -DYY_NO_UNISTD_H
+
+FLEX  = win/win_flex.exe
+BISON = win/win_bison.exe
+
+RM	  = Remove-Item -ErrorAction SilentlyContinue
+
+endif
+
+SRC_DIR = src
+OBJ_DIR = obj
+BIN_DIR = bin
 
 
-all: $(TARGET)
+SRC = $(wildcard $(SRC_DIR)/*.c)
+OBJ = $(SRC:.c=.o)
 
-$(TARGET): $(OBJ) $(LEX_OBJ) $(YACC_OBJ)
-	@mkdir -p $(BIN_DIR)
-	$(CC) $(LEX_OBJ) $(YACC_OBJ) -o $@ $(LDFLAGS)
+all: bin/$(PROJ)
 
-$(LEX_OBJ): $(LEX_SRC)
-	@mkdir -p $(BUILD_DIR)
-	$(FLEX) -o $(LEX_OBJ) $(LEX_SRC)
+bin/$(PROJ): gen/lex.yy.c gen/parser.tab.c
+	$(CC) $(CC_FLAGS) $(CC_REL) -o $@ $^
 
-$(YACC_OBJ) $(YACC_HEADER): $(YACC_SRC)
-	@mkdir -p $(BUILD_DIR)
-	$(BISON) -d -o $(YACC_OBJ) $(YACC_SRC)
+gen/lex.yy.c: src/lexer.l
+	$(FLEX) -o gen/lex.yy.c src/lexer.l
 
-run: $(TARGET)
-	@$(TARGET)
+gen/parser.tab.c: src/parser.y
+	$(BISON) -d -o gen/parser.tab.c src/parser.y
 
 clean:
-	@$(RM) $(BUILD_DIR)
+	$(RM) ./gen/lex.yy.c
+	$(RM) ./gen/parser.tab.c
+	$(RM) ./gen/parser.tab.h
+	$(RM) ./bin/$(PROJ)
 
-.PHONY: all clean run
+
+.PHONY: all clean
+
+# vim: noet
