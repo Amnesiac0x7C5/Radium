@@ -18,7 +18,7 @@ SHELL = pwsh.exe
 
 PROJ = radium.exe
 
-CC_FLAGS = --std=c17 -DYY_NO_UNISTD_H
+CC_FLAGS = --std=c17 -DYY_NO_UNISTD_H --include=./src/radium_win.h
 
 FLEX  = win/win_flex.exe
 BISON = win/win_bison.exe
