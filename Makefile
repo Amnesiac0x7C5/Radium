@@ -3,7 +3,7 @@
 PROJ = radium
 
 CC       = clang
-CC_FLAGS = --std=c17
+CC_FLAGS = --std=c17 --include=./src/radium_linux.h
 CC_REL   = -O2
 CC_DBG   = -O0 -Wall -g
 
