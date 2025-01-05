@@ -37,20 +37,7 @@ OBJ = $(SRC:.c=.o)
 
 all: bin/$(PROJ)
 
-bin/$(PROJ): gen/lex.yy.c gen/parser.tab.c
-	$(CC) $(CC_FLAGS) $(CC_REL) -o $@ $^
 
-gen/lex.yy.c: src/lexer.l
-	$(FLEX) -o gen/lex.yy.c src/lexer.l
-
-gen/parser.tab.c: src/parser.y
-	$(BISON) -d -o gen/parser.tab.c src/parser.y
-
-clean:
-	$(RM) ./gen/lex.yy.c
-	$(RM) ./gen/parser.tab.c
-	$(RM) ./gen/parser.tab.h
-	$(RM) ./bin/$(PROJ)
 
 
 .PHONY: all clean
