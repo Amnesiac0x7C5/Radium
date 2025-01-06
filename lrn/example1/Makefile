@@ -34,8 +34,7 @@ lex.yy.c: lex.l
 	$(FLEX) $^
 
 clean:
-	$(RM) *.yy.c
-	$(RM) *.exe
+	$(RM) lex.yy.c
 	$(RM) $(PROJ)
 
 .PHONY: all clean
