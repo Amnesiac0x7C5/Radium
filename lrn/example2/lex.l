@@ -41,19 +41,27 @@
 /* Rules Section */
 %%
 
+.         { ++num_chars; }
+\n         { ++num_lines; ++num_chars; }
 [^ \t\n]+  { ++num_words; }
-\n       { ++num_lines; ++num_chars; }
-.        { ++num_chars; }
+
+
 
 
 %%
 
 
 /* Driver Function */
-int main() 
+int main( int argc, char **argv )
 {
-    yylex(); /* Takes the input and do the rule matching */
-    printf("chars words lines: %d %d %d\n", num_chars, num_words, num_lines);
-
-    return 0;
+	if ( argc == 2 ){
+		yyin = fopen( argv[1], "r" );
+	}else{
+		yyin = stdin;
+	}
+	
+	yylex();
+    	printf("chars words lines: %d %d %d\n", num_chars, num_words, num_lines);
+	
+	return 0;
 }
