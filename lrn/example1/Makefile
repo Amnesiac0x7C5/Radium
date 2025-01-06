@@ -9,7 +9,7 @@ CC_DBG   = -O0 -Wall -g
 
 FLEX  = flex
 BISON = bison
-RM    = rm
+RM    = rm -f
 
 ifeq ($(OS), Windows_NT)
 
@@ -36,6 +36,7 @@ lex.yy.c: lex.l
 clean:
 	$(RM) *.yy.c
 	$(RM) *.exe
+	$(RM) $(PROJ)
 
 .PHONY: all clean
 

@@ -13,17 +13,26 @@
 %top{
 
 // This helps the Flex-generated file compile on Windows.
+
+// Windows
 #ifdef _WIN32
 
 #define YY_NO_UNISTD_H
 
-#include <io.h>
-#define isatty _isatty
-
 #include <stdio.h>
 #define fileno _fileno
 
-#endif // _WIN32
+#include <io.h>
+#define isatty _isatty
+
+#endif
+
+// Linux
+#ifdef __linux__
+
+#define _POSIX_C_SOURCE 1
+
+#endif 
 
 }
 
