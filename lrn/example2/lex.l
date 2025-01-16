@@ -41,7 +41,7 @@
 /* Rules Section */
 %%
 
-.         { ++num_chars; }
+.          { ++num_chars; }
 \n         { ++num_lines; ++num_chars; }
 [^ \t\n]+  { ++num_words; }
 
